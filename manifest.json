@@ -1,0 +1,9 @@
+{
+  "name": "Boulder Winter Hiking",
+  "short_name": "Hiking CO",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b172a",
+  "theme_color": "#1f4b99",
+  "icons": []
+}
