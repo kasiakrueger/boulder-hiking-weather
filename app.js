@@ -3,10 +3,12 @@ const BOULDER_LAT = 40.02;
 const BOULDER_LON = -105.25;
 
 // thresholds
-const MIN_FEELS_LIKE_F = 50;
+const MIN_FEELS_LIKE_F = 45;
+const MAX_FEELS_LIKE_F = 75;
 const MAX_WIND_MPH = 10;
-const MAX_CLOUD_PERCENT_SUNNY = 25;
+const MAX_CLOUD_PERCENT_SUNNY = 35;
 
+// ---- helpers ----
 function kToF(kelvin) {
   return (kelvin - 273.15) * 9 / 5 + 32;
 }
@@ -33,7 +35,8 @@ function evaluateDay(day) {
   const clouds = day.clouds ?? 0;
   const weatherLabel = (day.weather?.[0]?.description || "N/A");
 
-  const goodTemp = feelsLikeF >= MIN_FEELS_LIKE_F;
+  const goodTemp =
+    feelsLikeF >= MIN_FEELS_LIKE_F && feelsLikeF <= MAX_FEELS_LIKE_F;
   const goodWind = windMph < MAX_WIND_MPH;
   const goodSky = isSunny(day);
 
@@ -60,22 +63,21 @@ function formatDate(d) {
   });
 }
 
+// ---- main load function ----
 async function loadForecast() {
   const statusEl = document.getElementById("status");
   const daysEl = document.getElementById("days");
-  const scriptTag = document.currentScript;
-  const apiKey = scriptTag.getAttribute("data-api-key");
+  const apiKey = "20c50dce0b3ac7011b90c6e6d3987fbf";
 
-  if (!apiKey || apiKey === "YOUR_OPENWEATHER_API_KEY_HERE") {
-    statusEl.textContent =
-      "Please set your OpenWeather API key in index.html (data-api-key attribute).";
+  if (!apiKey) {
+    statusEl.textContent = "Missing OpenWeather API key.";
     return;
   }
 
   statusEl.textContent = "Fetching Boulder forecast…";
 
   try {
-    const url = new URL("https://api.openweathermap.org/data/2.5/onecall");
+    const url = new URL("https://api.openweathermap.org/data/3.0/onecall");
     url.searchParams.set("lat", BOULDER_LAT);
     url.searchParams.set("lon", BOULDER_LON);
     url.searchParams.set("exclude", "minutely,hourly,alerts");
@@ -137,7 +139,13 @@ async function loadForecast() {
       const reasons = document.createElement("div");
       reasons.className = "day-reasons";
       const parts = [];
-      parts.push(day.goodTemp ? "Temp OK" : "Too cold");
+
+      let tempReason = "Temp OK";
+      if (!day.goodTemp) {
+        tempReason =
+          day.feelsLikeF < MIN_FEELS_LIKE_F ? "Too cold" : "Too warm";
+      }
+      parts.push(tempReason);
       parts.push(day.goodWind ? "Wind OK" : "Too windy");
       parts.push(day.goodSky ? "Sunny enough" : "Not sunny");
       reasons.textContent = parts.join(" · ");
@@ -160,13 +168,10 @@ async function loadForecast() {
 // Register service worker for PWA installability
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").catch(console.error);
+    navigator.serviceWorker
+      .register("service-worker.js")
+      .catch(console.error);
   });
 }
 
 window.addEventListener("load", loadForecast);
-
-
-
-
-
