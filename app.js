@@ -3,9 +3,9 @@ const BOULDER_LAT = 40.02;
 const BOULDER_LON = -105.25;
 
 // thresholds
-const MIN_FEELS_LIKE_F = 50;
+const MIN_FEELS_LIKE_F = 45;
 const MAX_WIND_MPH = 10;
-const MAX_CLOUD_PERCENT_SUNNY = 25;
+const MAX_CLOUD_PERCENT_SUNNY = 35;
 
 function kToF(kelvin) {
   return (kelvin - 273.15) * 9 / 5 + 32;
@@ -165,3 +165,4 @@ if ("serviceWorker" in navigator) {
 }
 
 window.addEventListener("load", loadForecast);
+
